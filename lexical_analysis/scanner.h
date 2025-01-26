@@ -5,12 +5,12 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include <stdio.h>
+#include "../utils/symbolTable.h"
 
-static int ID_COUNTER = 0;
+static const char* KEYWORDS[] = {"if", "let", "print"};
 
 typedef enum {
-    CONST, ID, OP, PUNC, LITER, INVALID
+    CONST, ID, OP, PUNC, LITER, INVALID, KEYWORD
 } TokenName;
 
 typedef union {
@@ -25,6 +25,7 @@ typedef struct {
     TokenValue value;
 } Token;
 
+static int ID_COUNTER = 0;
 
 static int transition(int current, char input) {
     switch (current) {
@@ -79,10 +80,20 @@ static int transition(int current, char input) {
     }
 }
 
-static TokenName get_name(int state) {
+static TokenName check_keywords(char* lexeme) {
+    int numKeywords = sizeof(KEYWORDS) / sizeof(const char*);
+    for (int i = 0; i < numKeywords; i++) {
+        if (strcmp(lexeme, KEYWORDS[i]) == 0) {
+            return KEYWORD;  // It's a keyword
+        }
+    }
+    return ID;
+}
+
+static TokenName get_name(int state, char* lexeme) {
     switch (state) {
         case 1:
-            return ID;
+            return check_keywords(lexeme);
         case 2:
             return CONST;
         case 5:
@@ -104,16 +115,20 @@ static TokenValue get_value(TokenName name, char* input) {
     TokenValue value;
     if (name == ID) value.intValue = ID_COUNTER++;
     else if (name == CONST) value.floatValue = atof(input);
-    else if (name == LITER) strcpy(value.strValue, input);
+    else if (name == LITER || name == KEYWORD) {
+        value.strValue = (char*) malloc(strlen(input) + 1);
+        strcpy(value.strValue, input);
+    }
     else if (name == PUNC || name == OP) value.charValue = input[0];
 
     return value;
 }
 
-static void add_token(Token*** list, int* capacity, int* count, int state, char* lexeme) {
+static void add_token(Token*** list, int* capacity, int* count, int state, char* lexeme, SymbolTable* table) {
     Token* token = (Token*) malloc (sizeof(Token));
-    token->name = get_name(state);
+    token->name = get_name(state, lexeme);
     token->value = get_value(token->name, lexeme);
+    if (token->name == ID) add_identifier(table, token->value.intValue, lexeme);
 
 
     if (*count >= *capacity) {
@@ -134,6 +149,37 @@ static char* get_lexeme(char* str, int start, int index) {
     return lexeme;
 }
 
+static void print_token(Token* token) {
+    switch (token->name) {
+        case CONST:
+            printf("<CONST, %f>", token->value.floatValue);
+            break;
+        case ID:
+            printf("<ID, %i>", token->value.intValue);
+            break;
+        case OP:
+            printf("<OP, %c>", token->value.charValue);
+            break;
+        case LITER:
+            printf("<LITERAL, %s>", token->value.strValue);
+            break;
+        case PUNC:
+            printf("<PUNCT, %c>", token->value.charValue);
+            break;
+        case KEYWORD:
+            printf("<KEYWORD, %s>", token->value.strValue);
+            break;
+    }
+}
+
+void print_tokens(Token** tokens, int count) {
+    for (int i = 0; i < count; i++) {
+        print_token(tokens[i]);
+        printf(" ");
+    }
+    printf("\n");
+}
+
 void free_tokens(Token** tokens, int count) {
     for (int i = 0; i < count; i++) {
         free(tokens[i]);
@@ -141,7 +187,7 @@ void free_tokens(Token** tokens, int count) {
     free(tokens);
 }
 
-Token** tokenize(char* str, int* outCount) {
+Token** tokenize(char* str, int* outCount, SymbolTable* symbolTable) {
     Token** result = (Token**) malloc(sizeof(Token*));
     int count = 0;
     int capacity = 1;
@@ -159,7 +205,7 @@ Token** tokenize(char* str, int* outCount) {
         }
 
         char* lexeme = get_lexeme(str, start, i);
-        add_token(&result, &capacity, &count, state, lexeme);
+        add_token(&result, &capacity, &count, state, lexeme, symbolTable);
         free(lexeme);
 
         state = transition(0, input);
@@ -167,7 +213,7 @@ Token** tokenize(char* str, int* outCount) {
     }
 
     char* lexeme = get_lexeme(str, start, i);
-    add_token(&result, &capacity, &count, state, lexeme);
+    add_token(&result, &capacity, &count, state, lexeme, symbolTable);
     free(lexeme);
 
     *outCount = count;

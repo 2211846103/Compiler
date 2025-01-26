@@ -9,15 +9,15 @@ int main(int argc, char** argv) {
     char* filename = argv[1];
     char* sourceCode = read_file(filename);
 
+    SymbolTable* symbolTable = create_symbol_table();
+
     int count;
-    Token** tokens = tokenize(sourceCode, &count);
+    Token** tokens = tokenize(sourceCode, &count, symbolTable);
 
-    for (int i = 0; i < count; i++) {
-        print_token(tokens[i]);
-        printf(" ");
-    }
-    printf("\n");
+    print_tokens(tokens, count);
+    print_symbol_table(symbolTable);
 
+    free_symbol_table(symbolTable);
     free_tokens(tokens, count);
     free(sourceCode);
 
