@@ -1,0 +1,77 @@
+digraph {
+    rankdir=LR
+
+    Start [shape=hexagon]
+
+    subgraph cluster_const {
+        label="Constants"
+
+        cA [label="A", root=true]
+        cB [label="B"]
+        cC [label="C"]
+        cD [label="D", shape=doublecircle]
+
+        cA -> cB [label="0-9"]
+        cB -> cA [label="e"]
+        cB -> cC [label="."]
+        cC -> cD [label="0-9"]
+        cD -> cC [label="e"]
+        cB -> cD [label="e"]
+    }
+
+    subgraph cluster_id {
+        label="Lexemes"
+        
+        iA [label="A", root=true]
+        iB [label="B", shape=doublecircle]
+
+        iA -> iB [label="_a-zA-Z"]
+        iB -> iB [label="_a-zA-Z, 0-9"]
+    }
+
+    subgraph cluster_lit {
+        label="Literals"
+
+        lA [label="A", root=true]
+        lB [label="B"]
+        lC [label="C"]
+        lD [label="D"]
+        lE [label="E"]
+        lF [label="F"]
+        lG [label="G"]
+        lH [label="H", shape=doublecircle]
+        
+        lA -> lB [label="e"]
+        lB -> lC [label="\""]
+        lC -> lC [label="$"]
+        lC -> lD [label="\""]
+        lA -> lE [label="e"]
+        lE -> lF [label="'"]
+        lF -> lF [label="$"]
+        lF -> lG [label="'"]
+        lD -> lH [label="e"]
+        lG -> lH [label="e"]
+    }
+
+    subgraph cluster_op {
+        label="Operators"
+
+        oA [label="A", root=true]
+        oB [label="B", shape=doublecircle]
+
+        oA -> oB [label="=+-, *, /"]
+    }
+
+    subgraph cluster_punc {
+        label="Punctuators"
+
+        pA [label="A", root=true]
+        pB [label="B", shape=doublecircle]
+
+        pA -> pB [label=",;(){}"]
+    }
+
+    Start -> {
+        cA, iA, lA, oA, pA
+    } [label="e"]
+}

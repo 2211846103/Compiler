@@ -1,17 +1,19 @@
-Keywords:
-bet| 
-
 Constants:
-0-9
+[0-9]+(\.[0-9]+)?
 
 Identifiers:
-^[_a-zA-Z][_0-9a-zA-Z]*
+[_a-zA-Z][_0-9a-zA-Z]*
 
 Literals:
-["'].["']
+(".") | ('.')
 
 Punctuators:
-[,;]
+[,;\(\){}]
 
 Operators:
-[=+-*]
+[=+-*/]
+
+Comments:
+(//.*) | (/\*.\*/)
+
+Whitespace:

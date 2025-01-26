@@ -1,0 +1,49 @@
+digraph {
+    rankdir=LR
+
+    A [shape=hexagon]
+    B [shape=doublecircle]
+    C [shape=doublecircle]
+    F [shape=doublecircle]
+    G [shape=doublecircle]
+    I [shape=doublecircle]
+    J [shape=doublecircle]
+    K [shape=doublecircle]
+
+    A -> B [label="_a-zA-Z"]
+    A -> C [label="0-9"]
+    A -> L [label="."]
+    A -> D [label="\""]
+    A -> E [label="'"]
+    A -> F [label=",;(){}"]
+    A -> G [label="=+-*/"]
+
+    B -> B [label="_a-zA-Z, 0-9"]
+    B -> L [label="[^_a-zA-Z0-9]"]
+
+    C -> C [label="0-9"]
+    C -> H [label="."]
+    C -> L [label="[^0-9\.]"]
+
+    D -> D [label="[^\"]"]
+    D -> I [label="\""]
+
+    E -> E [label="[^']"]
+    E -> J [label="'"]
+
+    F -> L [label="$"]
+
+    G -> L [label="$"]
+
+    H -> K [label="0-9"]
+    H -> L [label="[^0-9]"]
+
+    I -> L [label="$"]
+
+    J -> L [label="$"]
+
+    K -> K [label="0-9"]
+    K -> L [label="[^0-9]"]
+
+    L -> L [label="$"]
+}
