@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     }
     printf("\n");
 
-    //free_tokens(tokens, count);
+    free_tokens(tokens, count);
     free(sourceCode);
 
     return 0;
